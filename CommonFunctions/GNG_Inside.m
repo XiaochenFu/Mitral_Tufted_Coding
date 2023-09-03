@@ -10,17 +10,12 @@
 %%
 % Necessary output: Trial number, Trial Type, Lick time in a time window,
 % time of the first water reward
-mydir  = pwd;
-idcs   = strfind(mydir,'\');
-newdir = mydir(1:idcs(end)-1);
-DataPath = fullfile(newdir,'Recording');
-ResultPath = fullfile(newdir,'Behaviour_Preprocess');
 
 window_lick_check = [-1 9];
 window_water_check = [0 10]; % check the first water onset within the FV opens
 
 %%
-DATA = readmatrix(fullfile(DataPath,FileName));
+
 if contains(FileName,'Sampling5KHz')
     fs_all = 5000;
 elseif contains(FileName,'Sampling2KHz')
