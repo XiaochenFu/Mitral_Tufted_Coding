@@ -1,3 +1,6 @@
+% Calculate the d' of the mouse with Loop_dprime_Inside.m. To use, call
+% this function in Excute_Defined_Animal.m
+
 addpath(genpath('C:\Users\yycxx\OneDrive - OIST\Ephys_Code\Library\spikes-master'));
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Basic_Settings')
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Useful_Functions')
