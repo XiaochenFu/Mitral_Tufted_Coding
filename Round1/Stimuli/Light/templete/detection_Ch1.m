@@ -3,12 +3,16 @@ clear
 close all
 clc
 
+% Read data from CSV file 
+DATA = readmatrix(['Light_Core2_19mA_192mA_Ch1_230909131059.csv']);
+
 % Define core, target intensities, driving currents, and pulse duration.
 Core = 2;
 target_intensity1 = 25;
 target_intensity2 = 25;
 driving_current1 = 191;
 driving_current2 = 192;
+target_Intensity = 25;
 pulse_duration = 5;% Duration of pulse in milliseconds.
 saveplot = 0; % Set to 1 if plots should be saved, 0 otherwise.
 
@@ -23,9 +27,8 @@ Colours
 c_Sp = c_M1_blue;
 c_Sm = c_M2_orange;
 
-% Read data from CSV file and load conversion from Ch1 (100mW range) to
-% mW
-DATA = readmatrix(['Light_Core2_19mA_192mA_Ch1_230909131059.csv']);
+
+% load conversion from Ch1 (100mW range) to mW
 load('MISC_Ch1.mat')
 
 % Define thresholds and sample rates.
@@ -121,6 +124,14 @@ output_filename = sprintf('Core%d_%dmA%dmA_Ch1_SpSm_%dms.jpg', Core, driving_cur
 if saveplot
     saveas(gcf, output_filename)
 end
+
+
+vtg1 = SP_vtg(end);
+vtg2 = SM_vtg(end);
+
+estimated_dc_value = estimateDC(driving_current1, driving_current2, vtg1, vtg2, target_Intensity);
+disp(['The estimated DC for a target VTG of ', num2str(target_Intensity), ' is ', num2str(estimated_dc_value)]);
+
 
 % Copy and rename the current script for logging.
 currentScript = strcat(mfilename('fullpath'), '.m');
