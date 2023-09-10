@@ -1,5 +1,6 @@
 addpath(genpath('C:\Users\yycxx\OneDrive - OIST\Ephys_Code\spikes-master'));
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Basic_Settings')
+% addpath('C:\Users\yycxx\OneDrive - OIST\Thesis\Behaviour\CommonFunctions')
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Useful_Functions')
 startup
 mydir  = pwd;

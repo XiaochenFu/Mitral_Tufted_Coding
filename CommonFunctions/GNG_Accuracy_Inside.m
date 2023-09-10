@@ -84,22 +84,13 @@ ylabel('differences in cumulated lick')
 title([training_day ' ' pair ' Diff Mean Cumsum Lick'])
 filename = sprintf('%s_%s_Diff_Mean_Cumsum_Lick.jpg',training_day,pair);
 % saveas(gcf,fullfile(ResultPath,filename))
-saveimg(gcf,ResultPath,Result_Title,filename,101)
-% %%
-% figure
-% % lick raster for all trials 
-% [binnedArray, bins] = timestampsToBinned(locs_Lick, eventTimes, binSize, calcWindow);
-% % lick raster for only s plus trials
-% binnedArray_SP = binnedArray;
-% binnedArray_SP(~splus_index,:) = 0;
-% [tr,b] = find(binnedArray_SP);
-% [rasterX,yy] = rasterize(bins(b));
-% rasterY = yy+reshape([zeros(size(tr'));tr';zeros(size(tr'))],1,length(tr)*3); % note from XFu. The original code duplicate the dots to make the ticks longer, which I believe is cheating. 
-% rasterX(rasterY==0) = [];rasterY(rasterY==0) = [];% remove zeros
-% plot(rasterX, rasterY,'r.')
+saveimg(gcf,ResultPath,Result_Title,filename,001)
+
 %% Sanity check: show raster plot of licks, response window
 figure
-subplot 121
+f = tiledlayout(1,2);
+% Tile 1
+nexttile
 % lick raster for all trials 
 [binnedArray, bins] = timestampsToBinned(locs_Lick, eventTimes, binSize, calcWindow);
 % lick raster for only s plus trials
@@ -112,9 +103,9 @@ rasterX(rasterY==0) = [];rasterY(rasterY==0) = [];% remove zeros
 plot(rasterX, rasterY,'r.')
 hold on 
 xline(t_FV_Water_s_avg)
-yl1 = ylim;
-% hold on
-subplot 122
+ylim([0, length(Behaviour_Info)]);xlim([0 8]);
+% Tile 1
+nexttile
 % same thing for sminus
 binnedArray_SM = binnedArray;
 binnedArray_SM(splus_index,:) = 0;
@@ -125,23 +116,17 @@ rasterX(rasterY==0) = [];rasterY(rasterY==0) = [];% remove zeros
 plot(rasterX, rasterY,'b.')
 hold on 
 xline(t_FV_Water_s_avg)
-xlim(calcWindow)
+ylim([0, length(Behaviour_Info)]);xlim([0 8]);
 % add legend
 L1 = plot(nan, nan, 'r.');
 L2 = plot(nan, nan, 'b.');
 legend([L1, L2], {'S+','S-'})
-
-
-yl2 = ylim;
-% Find leftmost xLeft
-ylow = min([yl1(1), yl2(1)]);
-% Find rightmost xRight
-yhigh = max([yl1(2), yl2(2)]);
-subplot 121
-ylim([ylow, yhigh]);
-subplot 122
-ylim([ylow, yhigh]);
-title([training_day ' ' pair ' Lick Rasters'])
+% title(f,[training_day ' ' pair ' Lick Rasters'],'FontSize',20)
+% xlabel(f,'Time from FV opening','FontSize',18)
+% ylabel(f,'Trial','FontSize',18)
+title(f,[training_day ' ' pair ' Lick Rasters'],'FontSize',30,'FontName', 'Times New Roman','FontWeight','bold')
+xlabel(f,'Time from FV opening','FontSize',28,'FontName', 'Times New Roman')
+ylabel(f,'Trial','FontSize',28,'FontName', 'Times New Roman')
 filename = sprintf('%s_%s_LIck_Raster.jpg',training_day,pair);
 saveas(gcf,fullfile(ResultPath,filename))
 %% calculate the accuracy according to a response window
@@ -163,24 +148,46 @@ for FF = 1:length(Behaviour_Info)
         end
     end
 end
-%% calculate the Dprime every 10 trials 
+%% calculate the Dprime wiht a sliding window every 5 trials
 figure
 Response = extractfield(Behaviour_Info , 'Response');
 HIT = strcmp('HIT',Response);
 FA = strcmp('FA',Response);
-for session = 1:length(Behaviour_Info)/10
-    n = 1:10;
-    n10 = (session-1)*10+n;
-    s_HIT = sum(HIT(n10));
-    s_FA = sum(FA(n10));
-    s_Plus = sum(splus_index(n10));
-    s_Minus = 10-s_Plus;
-    dP = Dprime_Loglinear_norm50(s_HIT,s_FA, s_Plus, s_Minus);
-    plot(session,dP,'kx')
-    hold on
+
+signal_label = 'HIT';
+noise_label = 'FA';
+labels = {Behaviour_Info.Response};
+
+% Calculate the hit and false alarm counts for each window
+hit_idx = strcmp(labels, signal_label);
+miss_idx = strcmp(labels, 'MISS');
+fa_idx = strcmp(labels, noise_label);
+cr_idx = strcmp(labels, 'CR');
+% HIT = strcmp('HIT',Response);
+% FA = strcmp('FA',Response);
+
+total_length = length(labels);
+window_steps = 5;
+window_width = 20;
+n_windows = length(1:window_steps:(total_length - window_width + 1));
+dprimes = zeros(1,n_windows);
+Session = 1:window_steps:(total_length - window_width + 1);
+k = 1;
+for i = 1:window_steps:(total_length - window_width + 1)
+    window_indices = i:(i + window_width - 1);
+    n_hit = sum(hit_idx(window_indices));
+    n_miss = sum(miss_idx(window_indices));
+    n_fa = sum(fa_idx(window_indices));
+    n_cr = sum(cr_idx(window_indices));
+    n_splus = n_hit + n_miss;
+    n_sminus = n_fa + n_cr;
+    dprimes(k) = Dprime_2N(n_hit, n_fa, n_splus, n_sminus);
+    k = k+1;
 end
-xlabel('x10 trials')
-ylabel('D prime')
+plot(Session,dprimes,'k')
+ylim([-1.5 4])
+xlabel('Trials')
+ylabel('d prime')
 title([training_day ' ' pair ' Learning Curve'])
 filename = sprintf('%s_%s_Learning_Curve.jpg',training_day,pair);
 saveas(gcf,fullfile(ResultPath,filename))

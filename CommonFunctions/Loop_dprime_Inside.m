@@ -76,7 +76,7 @@ for FF = 1:length(Behaviour_Info)
         end
     end
 end
-%% calculate the Dprime every 10 trials
+%% calculate the Dprime with a sliding window
 Response = extractfield(Behaviour_Info , 'Response');
 signal_label = 'HIT';
 noise_label = 'FA';
