@@ -67,9 +67,9 @@ if maxidiff<=1
     cum_lick_SP = cumsum(psth_SP_norm);
     cum_lick_SM = cumsum(psth_SM_norm);
     lick_threshold = (cum_lick_SP(maxdiffind)+cum_lick_SM(maxdiffind))/2;
-elseif max(cumsum(psth_SM_norm))<1
+elseif max(cumsum(psth_SM_norm(bins_SM<t_FV_Water_s_avg)))<1
     response_window = [0 bins_SM(maxdiffind)];
-    lick_threshold = 1;
+    lick_threshold = 0.5;
 
 else
     response_window = [0 bins_SM(maxdiffind)];
