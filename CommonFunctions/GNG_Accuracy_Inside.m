@@ -3,12 +3,10 @@ idcs   = strfind(mydir,'\');
 newdir = mydir(1:idcs(end)-1);
 DataPath = fullfile(newdir,'Behaviour_Preprocess');
 ResultPath = fullfile(newdir,'Behaviour_Accuracy');
-% Result_Title = strrep(FileName,'_BehaviourInfo.mat',[]);
 Result_Title = erase(FileName,'_BehaviourInfo.mat');
 n = split(Result_Title,"_");
 training_day = n{1}; 
 pair = n{2}; 
-% Result_Title = Convert_Behaviour_FileName(FileName);
 
 DataFile = [Result_Title,'_BehaviourInfo.mat'];
 load(fullfile(DataPath,DataFile))
@@ -52,15 +50,17 @@ title([training_day ' ' pair ' Mean Cumsum Lick'])
 filename = sprintf('%s_%s_Mean_Cumsum_Lick.jpg',training_day,pair);
 saveas(gcf,fullfile(ResultPath,filename))
 %% USe water time as the responding window
-% %% find the time when the differences betweeen licks for S+ and S- get most
+% %% find the differences betweeen licks for S+ and S- get at the end of
+% the responding window
 figure
 plot(bins_SM,cumsum(psth_SP_norm)-cumsum(psth_SM_norm))
 xlim([0 5])
 hold on 
 xline(t_FV_Water_s_avg)
-% about 3.45
 lick_difference = cumsum(psth_SP_norm)-cumsum(psth_SM_norm);
-[maxidiff,maxdiffind] = max(lick_difference(bins_SM<t_FV_Water_s_avg));
+lick_difference_before_water = lick_difference(bins_SM<t_FV_Water_s_avg);
+maxidiff = lick_difference_before_water(end);
+maxdiffind = length(lick_difference_before_water);
 if maxidiff<=1
     response_window = [0 t_FV_Water_s_avg];
     [~,maxdiffind] = max(bins_SM(bins_SM<t_FV_Water_s_avg)); % if mouse always licks more for s-, use time before FV opening as threshold
@@ -70,7 +70,6 @@ if maxidiff<=1
 elseif max(cumsum(psth_SM_norm(bins_SM<t_FV_Water_s_avg)))<1
     response_window = [0 bins_SM(maxdiffind)];
     lick_threshold = 0.5;
-
 else
     response_window = [0 bins_SM(maxdiffind)];
     cum_lick_SM = cumsum(psth_SM_norm);
@@ -98,7 +97,7 @@ binnedArray_SP = binnedArray;
 binnedArray_SP(~splus_index,:) = 0;
 [tr,b] = find(binnedArray_SP);
 [rasterX,yy] = rasterize(bins(b));
-rasterY = yy+reshape([zeros(size(tr'));tr';zeros(size(tr'))],1,length(tr)*3); % note from XFu. The original code duplicate the dots to make the ticks longer, which I believe is cheating. 
+rasterY = yy+reshape([zeros(size(tr'));tr';zeros(size(tr'))],1,length(tr)*3); 
 rasterX(rasterY==0) = [];rasterY(rasterY==0) = [];% remove zeros
 plot(rasterX, rasterY,'r.')
 hold on 
@@ -111,7 +110,7 @@ binnedArray_SM = binnedArray;
 binnedArray_SM(splus_index,:) = 0;
 [tr,b] = find(binnedArray_SM);
 [rasterX,yy] = rasterize(bins(b));
-rasterY = yy+reshape([zeros(size(tr'));tr';zeros(size(tr'))],1,length(tr)*3); % note from XFu. The original code duplicate the dots to make the ticks longer, which I believe is cheating. 
+rasterY = yy+reshape([zeros(size(tr'));tr';zeros(size(tr'))],1,length(tr)*3); 
 rasterX(rasterY==0) = [];rasterY(rasterY==0) = [];% remove zeros
 plot(rasterX, rasterY,'b.')
 hold on 
@@ -163,8 +162,6 @@ hit_idx = strcmp(labels, signal_label);
 miss_idx = strcmp(labels, 'MISS');
 fa_idx = strcmp(labels, noise_label);
 cr_idx = strcmp(labels, 'CR');
-% HIT = strcmp('HIT',Response);
-% FA = strcmp('FA',Response);
 
 total_length = length(labels);
 window_steps = 5;
