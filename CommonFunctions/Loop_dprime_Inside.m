@@ -84,36 +84,36 @@ noise_label = 'FA';
 % Extract the Behaviour_Info_cat labels from the Behaviour_Info structure
 labels = {Behaviour_Info.Response};
 
-
 % Calculate the hit and false alarm counts for each window
 hit_idx = strcmp(labels, signal_label);
 miss_idx = strcmp(labels, 'MISS');
 fa_idx = strcmp(labels, noise_label);
 cr_idx = strcmp(labels, 'CR');
-% HIT = strcmp('HIT',Response);
-% FA = strcmp('FA',Response);
 
 total_length = length(labels);
 window_steps = 5;
 window_width = 20;
-n_windows = length(1:window_steps:(total_length - window_width + 1));
-dprimes = zeros(1,n_windows);
+
+window_starts = 1:window_steps:(total_length - window_width + 1);
+window_indices = bsxfun(@plus, window_starts', (0:window_width-1));
+
 Session = 1:window_steps:(total_length - window_width + 1);
-k = 1;
-for i = 1:window_steps:(total_length - window_width + 1)
-    window_indices = i:(i + window_width - 1);
-    n_hit = sum(hit_idx(window_indices));
-    n_miss = sum(miss_idx(window_indices));
-    n_fa = sum(fa_idx(window_indices));
-    n_cr = sum(cr_idx(window_indices));
-    n_splus = n_hit + n_miss;
-    n_sminus = n_fa + n_cr;
-    dprimes(k) = Dprime_2N(n_hit, n_fa, n_splus, n_sminus);
-    k = k+1;
-end
+
+n_hit = sum(hit_idx(window_indices), 2);
+n_miss = sum(miss_idx(window_indices), 2);
+n_fa = sum(fa_idx(window_indices), 2);
+n_cr = sum(cr_idx(window_indices), 2);
+
+n_splus = n_hit + n_miss;
+n_sminus = n_fa + n_cr;
+
+dprimes = arrayfun(@(hit, fa, splus, sminus) Dprime_2N(hit, fa, splus, sminus), ...
+                      n_hit, n_fa, n_splus, n_sminus);
 nexttile
 plot(Session,dprimes,'k')
 ylim([-1.5 4])
+yline(0,'--','Color',[0.5,0.5,0.5])
+yline(2.5,':','Color',[0.5,0,0])
 title([training_day ' ' pair], 'FontSize',10)
 % filename = sprintf('%s_%s_Learning_Curve.jpg',training_day,pair);
 % % saveas(gcf,fullfile(ResultPath,filename))
