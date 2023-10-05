@@ -1,6 +1,7 @@
 addpath(genpath('C:\Users\yycxx\OneDrive - OIST\Ephys_Code\Library\spikes-master'));
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Basic_Settings')
 addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Useful_Functions')
+addpath('C:\Users\yycxx\Dropbox (OIST)\Fukunaga_Lab_Joined\Code\Useful_Functions\folderfile')
 startup
 close all
 mydir  = pwd;
@@ -23,6 +24,8 @@ for i = 1:length(FileNames)
 
     if exist('Restriction','var')
         filenames = get_defined_file_names(searchPath,Restriction);
+        filteredCell = myCell(~contains(myCell, 'abort','IgnoreCase',true));
+
         if any(contains(filenames,FileName))
             close all;
             
